@@ -13,6 +13,7 @@ pub mut:
 	server_mode bool
 	port        int
 	remote      string
+	clon_folder	string
 }
 
 fn handle_args() Settings {
@@ -28,6 +29,7 @@ fn handle_args() Settings {
 		server_mode: false // run as client by default
 		port	   : 43253
 		remote     : '127.0.0.1' 
+		clon_folder: 'd:/things/clonehero-win64/songs/'
 		// TODO: point to default clir server instead of localhost
 	}
 }
@@ -61,6 +63,10 @@ fn parse_arg(argument string, mut s Settings) {
 				no_value_found('-r', 'string')
 			}
 		}
+		'f' {
+			if value != '' { s.clon_folder = value }
+			else { no_value_found('-f', 'string') }
+		}
 		else {  
 			// the long form args
 			match short_arg.trim_left('-') {
@@ -70,8 +76,12 @@ fn parse_arg(argument string, mut s Settings) {
 					if value.int() > 0 && value.int() <= 65535 {
 						s.port = value.int()
 					} else {
-						no_value_found('-p', 'int')
+						no_value_found('--port', 'int')
 					}
+				}
+				'folder' {
+					if value != '' { s.clon_folder = value }
+					else { no_value_found('--folder', 'string') }
 				}
 
 				else { unknown_option(argument) }

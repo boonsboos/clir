@@ -53,7 +53,7 @@ mut:
 	idx		int
 }
 
-pub fn decode_score() []Score {
+pub fn decode_scores() []Score {
 	mut decoder := ScoreDecoder{
 		data: os.read_bytes(scores_path) or { panic('can\'t access your scores') }
 	}
@@ -112,7 +112,7 @@ fn (mut s ScoreDecoder) read_string() string {
 	// technically, since this'll only be used for the hash
 	// we can assume there'll always be 32 characters
 	s.idx += 32
-	return s.data[s.idx-32..s.idx].bytestr()
+	return s.data[s.idx-32..s.idx].bytestr().to_lower()
 }
 
 fn (mut s ScoreDecoder) read_u16() u16 {

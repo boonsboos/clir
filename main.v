@@ -8,6 +8,5 @@ fn main() {
 		println('server')
 	} else {
 		client.client()
-		println('client')
 	}
 }
