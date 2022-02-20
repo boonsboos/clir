@@ -95,8 +95,6 @@ pub fn decode_score() []Score {
 		scores << score
 	}
 
-	dump(scores)
-
 	return scores
 }
 
