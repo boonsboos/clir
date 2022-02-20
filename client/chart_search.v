@@ -3,43 +3,75 @@ module client
 import os
 import crypto.md5
 
-struct Chart {
-	artist  string
-	name    string
-	charter string
-}
+__global found_chart bool
 
 const root = settings.clon_folder
 
-fn song_info_for_hash(hash string) ?Chart {
-
-	songs := os.ls(root) or { ['no files'] }
+fn song_info_for_hash(hash string) {
 
 	mut subfolders := []string{}
 
-	println(songs)
+	if !found_chart { 
+		for i in os.ls(root) or { [''] } {
 
-	for i in 0..songs.len {
-
-		if os.is_dir(root+songs[i]) {
-			subfolders << root+songs[i]
-		}
-
-		if songs[i].all_before('.') == 'notes' {
-			found_hash := md5.hexhash(os.read_file(root+songs[i]) or { '' } )
-			if found_hash == hash {
-				
+			if os.is_dir(root+i) {
+				subfolders << '$root$i/'
+				continue
 			}
-		}
 
+			if i.all_before('.') == 'notes' {
+				found_hash := md5.hexhash(os.read_file('$root/$i/') or { '' } )
+				if found_hash == hash {
+					parse_song_ini(i)
+				}
+			}	
+
+		}
 	}
 
-	println(subfolders)
+	if !found_chart {
+		for i in subfolders {
+			recurse_deeper(i, hash)
+		}
+	}
 
-	return Chart{}
+	println('found: $found_chart')
+
 }
 
-fn parse_song_ini(folder string) Chart {
-	// find song.ini
-	// read line 1, 2, 4
+fn recurse_deeper(folder string, hash string) {
+	
+	mut subfolders := []string{}
+
+	if !found_chart {
+		for i in os.ls('$folder') or { ['no'] } {
+
+			if os.is_dir(folder+i) {
+				subfolders << '$folder$i/'
+				continue
+			}
+
+			if i == 'notes.mid' || i == 'notes.chart' {
+				found_hash := md5.hexhash(os.read_file('$folder$i') or { '' } )
+				if found_hash == hash {
+					println('hash matches, parsing ini')
+					parse_song_ini(folder)
+				}
+			}
+
+		}
+	}
+
+	if !found_chart {
+		for i in subfolders {
+			recurse_deeper(i, hash)
+		}
+	}
+
+}
+
+fn parse_song_ini(folder string) {
+	println('success')
+	found_chart = true
+	client_obj.recent_chart = Chart{'joe', 'mama', 'pizzeria'}
 }
