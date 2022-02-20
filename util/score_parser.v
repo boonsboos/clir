@@ -20,6 +20,10 @@ fn scores_path() string {
 	}
 }
 
+// MOST OF THIS WAS INDIRECTLY COPIED FROM github.com/gardockt/ch-merger
+// THANKS FOR YOUR REVERSE ENGINEER
+// YOU'VE SAVED ME A LOT OF TIME
+
 [heap]
 pub struct Score {
 pub:
@@ -33,7 +37,6 @@ pub:
 pub struct ScoreData {
 pub:
 	id		byte
-	// after id there's a skip byte
 	diff	byte
 	percent byte
 	fc		bool
@@ -50,45 +53,51 @@ mut:
 	idx		int
 }
 
-pub fn decode_score() Score {
+pub fn decode_score() []Score {
 	mut decoder := ScoreDecoder{
 		data: os.read_bytes(scores_path) or { panic('can\'t access your scores') }
 	}
 
 	decoder.skip(8) // skip version bytes at beginning of file
 
-	decoder.skip(1) // skip block begin
-	
-	hash := decoder.read_string()
-	instr_amnt := decoder.read_byte()
-	playcount := decoder.read_byte()
+	mut scores := []Score{}
 
-	decoder.skip(2)
+	for !decoder.is_eof() {
+		
+		assert decoder.read_byte() == 32 // block beginning
 
-	id := decoder.read_byte()
+		hash := decoder.read_string()
+		instr_amnt := decoder.read_byte()
+		playcount := decoder.read_byte()
 
-	decoder.skip(1)
+		decoder.skip(2)
 
-	difficulty := decoder.read_byte()
-	percentage := decoder.read_byte()
-	fc := byte_bool(decoder.read_byte())
-	speed := decoder.read_u16()
-	stars := decoder.read_byte()
-	mods := decoder.read_byte()
+		id := decoder.read_byte()
 
-	hiscore := decoder.read_uint()
+		decoder.skip(1)
 
-	data := ScoreData {
-		id, difficulty, percentage, fc, speed, stars, mods, hiscore
+		difficulty := decoder.read_byte()
+		percentage := decoder.read_byte()
+		fc := byte_bool(decoder.read_byte())
+		speed := decoder.read_u16()
+		stars := decoder.read_byte()
+		mods := decoder.read_byte()
+
+		hiscore := decoder.read_uint()
+
+		data := ScoreData {
+			id, difficulty, percentage, fc, speed, stars, mods, hiscore
+		}
+
+		score := Score {
+			hash, instr_amnt, playcount, data
+		}
+		scores << score
 	}
 
-	score := Score {
-		hash, instr_amnt, playcount, data
-	}
+	dump(scores)
 
-	dump(score)
-
-	return score
+	return scores
 }
 
 fn (mut s ScoreDecoder) read_byte() byte {
@@ -115,6 +124,10 @@ fn (mut s ScoreDecoder) read_u16() u16 {
 
 fn (mut s ScoreDecoder) skip(a int) {
 	s.idx += a
+}
+
+fn (mut s ScoreDecoder) is_eof() bool {
+	return s.idx >= s.data.len
 }
 
 [inline]
