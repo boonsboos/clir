@@ -1,17 +1,19 @@
 module client
 
-import util
+import os
 
-__global client_obj Client
+__global clir_client Client
 
 fn init() {
-	client_obj = Client{}
+	clir_client = Client{}
 }
 
 pub struct Client {
 pub mut:
-	scores		 map[string]util.Score
+	scores		 map[string]Score
 	recent_chart Chart
+	score_mtime  i64
+	found_chart  bool
 	// login details? identification key?
 }
 
@@ -22,22 +24,43 @@ mut:
 	charter string
 }
 
-pub fn client() {
+pub fn run() {
 	// watch scores.bin
 	// reparse when mtime changes
-	// use smth similar to a diff
-	map_scores()
+	map_scores_to_client()
+	clir_client.score_mtime = os.file_last_mod_unix(scores_path)
 
-	println('$client_obj.scores.len scores')
-	// space oddity
-	song := go song_info_for_hash('B164D095681DE51A5F9E341906DCF602'.to_lower())
+	for {
+		if os.file_last_mod_unix(scores_path) != clir_client.score_mtime {
+			clir_client.score_mtime = os.file_last_mod_unix(scores_path)
+			compare_map()
 
-	song.wait()
-	println(client_obj.recent_chart)
+		}
+	}
 }
 
-fn map_scores() {
-	for i in util.decode_scores() {
-		client_obj.scores[i.hash] = i
+fn compare_map() {
+	for i in decode_scores() {
+		if i != clir_client.scores[i.hash] {
+			println(i)
+			song_info_for_hash(i.hash.to_lower())
+			println(clir_client.recent_chart)
+			// send the score to the server
+			map_scores_to_client()
+			break
+		}
 	}
+}
+
+fn map_scores() map[string]Score {
+	mut tmp := map[string]Score{}
+	for i in decode_scores() {
+		tmp[i.hash] = i
+	}
+	return tmp
+}
+
+[inline]
+fn map_scores_to_client() {
+	clir_client.scores = map_scores()
 }

@@ -1,12 +1,8 @@
 module main
 
 import client
+import util // imported so the settings work
 
 fn main() {
-	if settings.server_mode {
-		// server()
-		println('server')
-	} else {
-		client.client()
-	}
+	client.run()
 }

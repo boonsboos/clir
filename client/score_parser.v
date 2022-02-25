@@ -1,4 +1,4 @@
-module util
+module client
 
 import encoding.binary
 import os
