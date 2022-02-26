@@ -1,6 +1,7 @@
 module client
 
 import os
+import time
 
 __global clir_client Client
 
@@ -8,20 +9,21 @@ fn init() {
 	clir_client = Client{}
 }
 
+[heap]
 pub struct Client {
 pub mut:
 	scores		 map[string]Score
 	recent_chart Chart
+	recent_score Clir
 	score_mtime  i64
 	found_chart  bool
 	// login details? identification key?
 }
 
-struct Chart {
-mut:
-	artist  string
-	name    string
-	charter string
+pub struct Clir {
+pub:
+	score_data	Score
+	chart_data  Chart
 }
 
 pub fn run() {
@@ -36,6 +38,7 @@ pub fn run() {
 			clir_client.score_mtime = os.file_last_mod_unix(scores_path)
 			compare_map() 
 		}
+		time.sleep(time.second)
 	}
 }
 
@@ -43,10 +46,12 @@ pub fn run() {
 fn compare_map() {
 	for i in decode_scores() {
 		if i != clir_client.scores[i.hash] {
-			println(i)
 			song_info_for_hash(i.hash.to_lower())
-			println(clir_client.recent_chart)
-			// send the score to the server
+
+			clir_client.recent_score = Clir{i, clir_client.recent_chart}
+
+			println(clir_client.recent_score)
+			// send the score to the server 
 			map_scores_to_client()
 			break
 		}
