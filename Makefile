@@ -1,4 +1,4 @@
-FLAGS := -skip-unused -enable-globals 
+FLAGS := -skip-unused -enable-globals
 # skip-unused omits functions that we do not use
 # enable-globals enables global variables
 
@@ -6,7 +6,7 @@ test-win:
 	v $(FLAGS) .
 
 build-win:
-	v -prod $(FLAGS) .
+	v -cc gcc -prod $(FLAGS) .
 
 test-linux:
 	v $(FLAGS) -compress .

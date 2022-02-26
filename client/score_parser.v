@@ -63,9 +63,10 @@ pub fn decode_scores() []Score {
 	mut scores := []Score{}
 
 	for !decoder.is_eof() {
+		if decoder.read_byte() != 0x20 {
+			panic('malformed scores.bin!')
+		} // block beginning
 		
-		assert decoder.read_byte() == 32 // block beginning
-
 		hash := decoder.read_string()
 		instr_amnt := decoder.read_byte()
 		playcount := decoder.read_byte()
@@ -82,7 +83,6 @@ pub fn decode_scores() []Score {
 		speed := decoder.read_u16()
 		stars := decoder.read_byte()
 		mods := decoder.read_byte()
-
 		hiscore := decoder.read_uint()
 
 		data := ScoreData {
@@ -125,11 +125,10 @@ fn (mut s ScoreDecoder) skip(a int) {
 }
 
 fn (mut s ScoreDecoder) is_eof() bool {
+	println('idx: $s.idx | data len: $s.data.len')
 	return s.idx >= s.data.len
 }
 
-[inline]
 fn byte_bool(i byte) bool {
-	if i == 0 { return false } 
-	return true
+	return i == 1
 }

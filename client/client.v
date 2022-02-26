@@ -1,7 +1,6 @@
 module client
 
 import os
-import time
 
 __global clir_client Client
 

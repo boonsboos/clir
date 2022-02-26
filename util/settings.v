@@ -44,9 +44,13 @@ songs_folder=""') or { panic('could not write to settings file') }
 	settings.port = port
 
 	// TODO: check if remote exists/is reachable
+	// TODO: remove this option, there should only be ONE
+	// central clir server
 	settings.remote = remote
 
-	if folder[folder.len-1] == 0x4f { folder = folder[0..folder.len] } // check if /
+	if folder[folder.len-1] == 0x4f { 
+		folder = folder[0..folder.len]
+	} // trailing slash handling
 	if !os.exists(folder) && !os.is_dir(folder) {
 		panic('bad songs folder path')
 	} else { 

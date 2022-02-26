@@ -52,7 +52,7 @@ fn recurse_deeper(folder string, hash string) {
 				found_hash := md5.hexhash(os.read_file('$folder$i') or { '' } )
 				if found_hash == hash {
 					println('hash matches, parsing ini')
-					parse_song_ini(folder)
+					parse_song_ini('${folder}song.ini')
 				}
 			}
 
@@ -71,7 +71,7 @@ fn recurse_deeper(folder string, hash string) {
 
 }
 
-fn parse_song_ini(folder string) {
+fn parse_song_ini(song string) {
 	println('success')
 	clir_client.found_chart = true
 	clir_client.recent_chart = Chart{'joe', 'mama', 'pizzeria'}
