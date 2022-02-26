@@ -6,8 +6,7 @@ import toml
 __global settings Settings
 
 fn init() {
-	read_config()
-	handle_args()
+	settings = Settings{}
 }
 
 const settings_path = os.executable().replace('\\','/').all_before_last('/')+'/settings.toml'
@@ -20,7 +19,9 @@ pub mut:
 	clon_folder	string
 }
 
-fn read_config() {
+pub fn read_config() {
+
+	
 
 	if !os.exists(settings_path) {
 		mut file := os.create(settings_path) or { panic(err) }
@@ -35,7 +36,7 @@ songs_folder=""') or { panic('could not write to settings file') }
 
 	port := file.value('port').int()
 	remote := file.value('remote').string()
-	folder := file.value('songs_folder').string()
+	mut folder := file.value('songs_folder').string()//.replace('\\', '/')
 
 	if port <= 1024 || port >= 65536 {
 		panic('bad port!')
@@ -45,14 +46,15 @@ songs_folder=""') or { panic('could not write to settings file') }
 	// TODO: check if remote exists/is reachable
 	settings.remote = remote
 
-	if !os.exists(folder) {
-		panic('could not find songs folder')
+	if folder[folder.len-1] == 0x4f { folder = folder[0..folder.len] } // check if /
+	if !os.exists(folder) && !os.is_dir(folder) {
+		panic('bad songs folder path')
+	} else { 
+		settings.clon_folder = folder
 	}
-	if !folder.ends_with('/') { settings.clon_folder = folder + '/' }
-	else { settings.clon_folder = folder }
 } 
 
-fn handle_args() {
+pub fn handle_args() {
 
 	if os.args.len > 1 {
 		for i in os.args[1..os.args.len] {
@@ -90,8 +92,11 @@ fn parse_arg(argument string) {
 			}
 		}
 		'f' {
-			if value != '' { settings.clon_folder = value }
-			else { no_value_found('-f', 'string') }
+			if value != '' { 
+				if os.exists(value) && os.is_dir(value) {
+					settings.clon_folder = value
+				}
+			} else { no_value_found('--folder', 'string') }
 		}
 		else {  
 			// the long form args
@@ -112,8 +117,11 @@ fn parse_arg(argument string) {
 					}
 				}
 				'folder' {
-					if value != '' { settings.clon_folder = value }
-					else { no_value_found('--folder', 'string') }
+					if value != '' { 
+						if os.exists(value) && os.is_dir(value) {
+							settings.clon_folder = value
+						}
+					} else { no_value_found('--folder', 'string') }
 				}
 
 				else { unknown_option(argument) }

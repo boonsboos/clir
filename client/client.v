@@ -1,6 +1,7 @@
 module client
 
 import os
+import time
 
 __global clir_client Client
 
@@ -25,20 +26,21 @@ mut:
 }
 
 pub fn run() {
-	// watch scores.bin
-	// reparse when mtime changes
+	
 	map_scores_to_client()
 	clir_client.score_mtime = os.file_last_mod_unix(scores_path)
 
+	// watch scores.bin
+	// reparse when mtime changes
 	for {
 		if os.file_last_mod_unix(scores_path) != clir_client.score_mtime {
 			clir_client.score_mtime = os.file_last_mod_unix(scores_path)
-			compare_map()
-
+			compare_map() 
 		}
 	}
 }
 
+// compare current scores to updated scores
 fn compare_map() {
 	for i in decode_scores() {
 		if i != clir_client.scores[i.hash] {

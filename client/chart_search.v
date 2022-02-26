@@ -3,17 +3,16 @@ module client
 import os
 import crypto.md5
 
-const root = settings.clon_folder
-
 fn song_info_for_hash(hash string) {
 
+	root := settings.clon_folder
+	clir_client.found_chart = false
 	mut subfolders := []string{}
 
-	if !clir_client.found_chart { 
+	for clir_client.found_chart == false {
 		for i in os.ls(root) or { [''] } {
-
-			if os.is_dir(root+i) {
-				subfolders << '$root$i/'
+			if os.is_dir(root+'/'+i) {
+				subfolders << '$root/$i/'
 				continue
 			}
 
@@ -23,18 +22,18 @@ fn song_info_for_hash(hash string) {
 					parse_song_ini(i)
 				}
 			}	
-
 		}
+		break
 	}
 
-	if !clir_client.found_chart {
+	for !clir_client.found_chart {
+		mut threads := []thread{len: subfolders.len} 
 		for i in subfolders {
-			recurse_deeper(i, hash)
+			threads << go recurse_deeper(i, hash)
 		}
+		threads.wait()
+		break
 	}
-
-	println('chart not found')
-	clir_client.found_chart = false
 
 }
 
@@ -42,9 +41,8 @@ fn recurse_deeper(folder string, hash string) {
 	
 	mut subfolders := []string{}
 
-	if !clir_client.found_chart {
-		for i in os.ls('$folder') or { ['no'] } {
-
+	for clir_client.found_chart == false {
+		for i in os.ls(folder) or { [''] } {
 			if os.is_dir(folder+i) {
 				subfolders << '$folder$i/'
 				continue
@@ -59,12 +57,16 @@ fn recurse_deeper(folder string, hash string) {
 			}
 
 		}
+		break
 	}
 
-	if !clir_client.found_chart {
+	for !clir_client.found_chart {
+		mut threads := []thread{len: subfolders.len} 
 		for i in subfolders {
-			recurse_deeper(i, hash)
+			threads << go recurse_deeper(i, hash)
 		}
+		threads.wait()
+		break
 	}
 
 }
