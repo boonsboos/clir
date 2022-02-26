@@ -14,10 +14,6 @@ pub fn (mut c Encoder) encode_string(s string) {
 	c.data << s.bytes()
 }
 
-pub fn (mut c Encoder) encode_byte(b byte) {
-	c.data << b
-}
-
 pub fn (mut c Encoder) encode_u64(u u64) {
 	binary.little_endian_put_u64(mut c.data, u)
 }
@@ -28,6 +24,10 @@ pub fn (mut c Encoder) encode_u32(u u32) {
 
 pub fn (mut c Encoder) encode_u16(u u16) {
 	binary.little_endian_put_u16(mut c.data, u)
+}
+
+pub fn (mut c Encoder) encode_byte(b byte) {
+	c.data << b
 }
 
 pub fn (mut c Encoder) encode_bool(b bool) {
@@ -59,14 +59,15 @@ fn encode_c_auth_request(pack CAuthRequest) []byte {
 fn encode_clir_send(pack CClirSend) []byte {
 	mut e := Encoder{}
 	e.encode_byte(pack.id)
-	// encode the key here so we can be sure it's the same player
+
+	// encode the key again here so we can be sure it's the same player
 	e.encode_string(pack.key)
-	// beware for messy
+
 	score := pack.clir.score_data
-	data := pack.clir.score_data.scoredata
 	e.encode_string(score.hash) // chart hash
 	e.encode_byte(score.playcount) // might remove this
 
+	data := pack.clir.score_data.scoredata
 	e.encode_byte(data.diff) // chart difficulty
 	e.encode_byte(data.percent) // accuracy
 	e.encode_bool(data.fc) // is fc?

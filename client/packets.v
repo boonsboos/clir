@@ -17,6 +17,10 @@ import time
 
 // Packets are length prefixed (u32)
 
+interface Packet { 
+	id byte
+}
+
 struct CHandshake {
 pub:
 	id byte = 1
@@ -36,7 +40,7 @@ pub:
 	key string
 }
 
-struct SInvalidAuth {
+struct SInvalid {
 pub:
 	id byte = 3
 }
