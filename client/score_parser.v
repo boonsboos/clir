@@ -41,8 +41,8 @@ pub:
 	percent byte
 	fc		bool
 	speed   u16
-	stars   byte 
-	mods    byte // bitmask
+	stars   byte
+	mods    byte
 	hiscore u32
 }
 
@@ -125,7 +125,6 @@ fn (mut s ScoreDecoder) skip(a int) {
 }
 
 fn (mut s ScoreDecoder) is_eof() bool {
-	println('idx: $s.idx | data len: $s.data.len')
 	return s.idx >= s.data.len
 }
 

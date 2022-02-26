@@ -3,6 +3,13 @@ module client
 import os
 import crypto.md5
 
+struct Chart {
+mut:
+	artist  string
+	name    string
+	charter string
+}
+
 fn song_info_for_hash(hash string) {
 
 	root := settings.clon_folder
@@ -51,7 +58,6 @@ fn recurse_deeper(folder string, hash string) {
 			if i == 'notes.chart' || i == 'notes.mid' {
 				found_hash := md5.hexhash(os.read_file('$folder$i') or { '' } )
 				if found_hash == hash {
-					println('hash matches, parsing ini')
 					parse_song_ini('${folder}song.ini')
 				}
 			}
@@ -72,7 +78,14 @@ fn recurse_deeper(folder string, hash string) {
 }
 
 fn parse_song_ini(song string) {
-	println('success')
 	clir_client.found_chart = true
-	clir_client.recent_chart = Chart{'joe', 'mama', 'pizzeria'}
+	mut chart := Chart{} 
+	ini := os.read_lines(song) or { panic('you got something funny going on with the') }
+	for i in ini {
+		value := i.all_after('=').trim_space()
+		if i.starts_with('name')            { chart.name = value }
+		else if i.starts_with('artist')   { chart.artist = value }
+		else if i.starts_with('charter') { chart.charter = value }
+	}
+	clir_client.recent_chart = chart
 }
