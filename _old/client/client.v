@@ -12,6 +12,7 @@ fn init() {
 [heap]
 pub struct Client {
 pub mut:
+	busy         bool
 	scores		 map[string]Score
 	recent_chart Chart
 	recent_score Clir
@@ -34,8 +35,9 @@ pub fn run() {
 	// watch scores.bin
 	// reparse when mtime changes
 	for {
-		if os.file_last_mod_unix(scores_path) != clir_client.score_mtime {
+		if os.file_last_mod_unix(scores_path) != clir_client.score_mtime && !clir_client.busy {
 			clir_client.score_mtime = os.file_last_mod_unix(scores_path)
+			println('memleak')
 			compare_map() 
 		}
 		time.sleep(time.second)
@@ -45,8 +47,8 @@ pub fn run() {
 // compare current scores to updated scores
 fn compare_map() {
 	for i in decode_scores() {
-		println('we memleaking?')
 		if i != clir_client.scores[i.hash] {
+			clir_client.busy = true
 			song_info_for_hash(i.hash.to_lower())
 
 			clir_client.recent_score = Clir{i, clir_client.recent_chart}
@@ -55,6 +57,7 @@ fn compare_map() {
 			// send the score to the server
 			send(clir_client.recent_score)
 			map_scores_to_client()
+			clir_client.busy = false
 			break
 		}
 	}

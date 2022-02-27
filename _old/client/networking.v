@@ -12,10 +12,10 @@ fn send(clir Clir) {
 	handshake := CHandshake{} // for verifying correct handshake later on
 	conn.write(encode_handshake(handshake)) or { panic('failed to send handshake') }
 
-	buf_len := conn.read(mut read_buf) or { panic('connection closed early') }
-	println(read_buf[0..buf_len])
+	shake_len := conn.read(mut read_buf) or { panic('connection closed early') }
 	s_shake := decode_packet(read_buf)
-	read_buf.clear()
+	println('handshake reply: ${read_buf[0..shake_len]}')
+	// read_buf.clear()
 
 	if s_shake is SHandshake{
 		println('received handshake reply')
@@ -28,12 +28,12 @@ fn send(clir Clir) {
 		key: settings.auth_key
 	}
 	println('writing auth')
-	conn.write(encode_auth_request(auth)) or { panic('failed to send auth') }
+	conn.write(encode_auth_request(auth)) or { fuck_() }
 
-	conn.read(mut read_buf) or { panic('failed to read 2') }
+	auth_len := conn.read(mut read_buf) or { fuck_() }
 	auth_reply := decode_packet(read_buf)
-	println(read_buf[0..buf_len])
-	read_buf.clear()
+	println('auth reply: ${read_buf[0..auth_len]}')
+	// read_buf.clear()
 
 	if auth_reply is SInvalid {
 		conn.close() or { panic('bad auth key') }
@@ -43,7 +43,12 @@ fn send(clir Clir) {
 		key : settings.auth_key
 		clir: clir
 	}
-	conn.write(encode_clir_send(clir_pack)) or { panic('failed to send clir') }
+	conn.write(encode_clir_send(clir_pack)) or { fuck_() }
 
 	conn.close() or { panic('failed to end transmission') }
+}
+
+[noreturn]
+fn fuck_() {
+
 }

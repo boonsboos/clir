@@ -1,4 +1,4 @@
-FLAGS := -skip-unused -enable-globals
+FLAGS := -skip-unused -enable-globals -gc boehm
 # skip-unused omits functions that we do not use
 # enable-globals enables global variables
 
