@@ -10,20 +10,26 @@ mut:
 
 // strings are length prefixed
 pub fn (mut c Encoder) encode_string(s string) {
-	binary.little_endian_put_u32(mut c.data, u32(s.len))
+	c.encode_u32(u32(s.len))
 	c.data << s.bytes()
 }
 
 pub fn (mut c Encoder) encode_u64(u u64) {
-	binary.little_endian_put_u64(mut c.data, u)
+	mut tmp := []byte{len:8}
+	binary.little_endian_put_u64(mut tmp, u)
+	c.data << tmp
 }
 
 pub fn (mut c Encoder) encode_u32(u u32) {
-	binary.little_endian_put_u32(mut c.data, u)
+	mut tmp := []byte{len:4}
+	binary.little_endian_put_u32(mut tmp, u)
+	c.data << tmp
 }
 
 pub fn (mut c Encoder) encode_u16(u u16) {
-	binary.little_endian_put_u16(mut c.data, u)
+	mut tmp := []byte{len:2}
+	binary.little_endian_put_u16(mut tmp, u)
+	c.data << tmp
 }
 
 pub fn (mut c Encoder) encode_byte(b byte) {
@@ -35,21 +41,22 @@ pub fn (mut c Encoder) encode_bool(b bool) {
 }
 
 pub fn (mut c Encoder) finish() []byte {
-	mut tmp := []byte{len:4+c.data.len}
+	mut tmp := []byte{len:4}
+	println(c.data.len)
 	binary.little_endian_put_u32(mut tmp, u32(c.data.len))
 	tmp << c.data
 	return tmp
 }
 
-fn encode_handshake() []byte {
-	pack := CHandshake{}
+fn encode_handshake(pack CHandshake) []byte {
 	mut e := Encoder{}
 	e.encode_byte(pack.id)
+	println(pack.ts)
 	e.encode_u64(pack.ts)
 	return e.finish()
 }
 
-fn encode_c_auth_request(pack CAuthRequest) []byte {
+fn encode_auth_request(pack CAuthRequest) []byte {
 	mut e := Encoder{}
 	e.encode_byte(pack.id)
 	e.encode_string(pack.key)

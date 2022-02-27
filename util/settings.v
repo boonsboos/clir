@@ -12,16 +12,14 @@ fn init() {
 const settings_path = os.executable().replace('\\','/').all_before_last('/')+'/settings.toml'
 
 pub struct Settings {
-mut:
+pub mut:
 	port        int
 	remote      string
-pub mut:
 	clon_folder	string
+	auth_key    string
 }
 
 pub fn read_config() {
-
-	
 
 	if !os.exists(settings_path) {
 		mut file := os.create(settings_path) or { panic(err) }
@@ -29,15 +27,17 @@ pub fn read_config() {
 		file.write_string('
 port=43254
 remote="127.0.0.1"
-songs_folder=""') or { panic('could not write to settings file') }
+songs_folder=""
+auth_key="blub"') or { panic('could not write to settings file') }
 	}
 
 	file := toml.parse(settings_path) or { panic('you messed up your settings file') }
 
 	port := file.value('port').int()
 	remote := file.value('remote').string()
+	auth_key := file.value('auth_key').string()
 	mut folder := file.value('songs_folder').string()//.replace('\\', '/')
-
+	
 	if port <= 1024 || port >= 65536 {
 		panic('bad port!')
 	}
@@ -56,6 +56,8 @@ songs_folder=""') or { panic('could not write to settings file') }
 	} else { 
 		settings.clon_folder = folder
 	}
+
+	settings.auth_key = auth_key
 } 
 
 pub fn handle_args() {

@@ -22,7 +22,7 @@ pub fn (mut d Decoder) decode_string() string {
 	if d.not_eof() && d.offset_eof(str_len) {
 		d.idx += str_len
 	} else {
-		panic('mangled packet!')
+		panic('mangled string')
 	}
 	return d.data[d.idx-str_len..d.idx].bytestr()
 }
@@ -31,7 +31,7 @@ pub fn (mut d Decoder) decode_u64() u64 {
 	if d.not_eof() && d.offset_eof(8) {
 		d.idx += 8
 	} else {
-		panic('mangled packet!')
+		panic('mangled u64')
 	}
 	return binary.little_endian_u64(d.data[d.idx-8..d.idx])
 }
@@ -40,7 +40,7 @@ pub fn (mut d Decoder) decode_u32() u32 {
 	if d.not_eof() && d.offset_eof(4) {
 		d.idx += 4
 	} else {
-		panic('mangled packet!')
+		panic('mangled u32')
 	}
 	return binary.little_endian_u32(d.data[d.idx-4..d.idx])
 }
@@ -49,7 +49,7 @@ pub fn (mut d Decoder) decode_u16() u16 {
 	if d.not_eof() && d.offset_eof(2) {
 		d.idx += 2
 	} else {
-		panic('mangled packet')
+		panic('mangled short')
 	}
 	return binary.little_endian_u16(d.data[d.idx-2..d.idx])
 }
@@ -58,7 +58,7 @@ pub fn (mut d Decoder) decode_byte() byte {
 	if d.not_eof() && d.offset_eof(1) {
 		d.idx++
 	} else {
-		panic('mangled packet!')
+		panic('mangled byte')
 	}
 	return d.data[d.idx-1]
 }
@@ -69,12 +69,12 @@ pub fn (mut d Decoder) decode_bool() bool {
 
 [inline]
 pub fn (mut d Decoder) not_eof() bool {
-	return d.len > d.idx
+	return d.len >= d.idx-4
 }
 
 [inline]
 pub fn (mut d Decoder) offset_eof(offset int) bool {
-	return d.len > d.idx + offset
+	return d.len >= d.idx-4 + offset
 }
 
 // should be delegated to packet handling function

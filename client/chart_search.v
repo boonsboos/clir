@@ -14,9 +14,10 @@ fn song_info_for_hash(hash string) {
 
 	root := settings.clon_folder
 	clir_client.found_chart = false
+	clir_client.recent_chart = Chart{}
 	mut subfolders := []string{}
 
-	for clir_client.found_chart == false {
+	if clir_client.found_chart == false {
 		for i in os.ls(root) or { [''] } {
 			if os.is_dir(root+'/'+i) {
 				subfolders << '$root/$i/'
@@ -30,16 +31,23 @@ fn song_info_for_hash(hash string) {
 				}
 			}	
 		}
-		break
 	}
 
-	for !clir_client.found_chart {
+	if !clir_client.found_chart {
 		mut threads := []thread{len: subfolders.len} 
 		for i in subfolders {
 			threads << go recurse_deeper(i, hash)
 		}
 		threads.wait()
-		break
+	}
+
+	if clir_client.recent_chart == Chart{} {
+		clir_client.recent_chart = Chart {
+			'chart'
+			'not'
+			'found'
+		}
+		return
 	}
 
 }
@@ -48,7 +56,7 @@ fn recurse_deeper(folder string, hash string) {
 	
 	mut subfolders := []string{}
 
-	for clir_client.found_chart == false {
+	if clir_client.found_chart == false {
 		for i in os.ls(folder) or { [''] } {
 			if os.is_dir(folder+i) {
 				subfolders << '$folder$i/'
@@ -63,16 +71,14 @@ fn recurse_deeper(folder string, hash string) {
 			}
 
 		}
-		break
 	}
 
-	for !clir_client.found_chart {
+	if !clir_client.found_chart {
 		mut threads := []thread{len: subfolders.len} 
 		for i in subfolders {
 			threads << go recurse_deeper(i, hash)
 		}
 		threads.wait()
-		break
 	}
 
 }
@@ -85,7 +91,19 @@ fn parse_song_ini(song string) {
 		value := i.all_after('=').trim_space()
 		if i.starts_with('name')            { chart.name = value }
 		else if i.starts_with('artist')   { chart.artist = value }
-		else if i.starts_with('charter') { chart.charter = value }
+		else if i.starts_with('charter') { chart.charter = remove_html_tags(value) }
 	}
+
 	clir_client.recent_chart = chart
+}
+
+fn remove_html_tags(s string) string {
+	mut res := s
+    for res.contains_any('</>') {
+        open := res.index('<') or { 0 }
+        close := res.index('>') or { 0 }
+        substr := res.substr(open, close)
+        res.replace(substr, '')
+    }
+    return res
 }

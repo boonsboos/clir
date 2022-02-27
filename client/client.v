@@ -45,13 +45,15 @@ pub fn run() {
 // compare current scores to updated scores
 fn compare_map() {
 	for i in decode_scores() {
+		println('we memleaking?')
 		if i != clir_client.scores[i.hash] {
 			song_info_for_hash(i.hash.to_lower())
 
 			clir_client.recent_score = Clir{i, clir_client.recent_chart}
 
 			println(clir_client.recent_score)
-			// send the score to the server 
+			// send the score to the server
+			send(clir_client.recent_score)
 			map_scores_to_client()
 			break
 		}
