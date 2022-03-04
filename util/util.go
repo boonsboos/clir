@@ -53,6 +53,9 @@ auth_key="blub"`)
 	folder := strings.Split(string(fol), "=")[1]
 	rep := strings.NewReplacer("\"", "")
 	folder = rep.Replace(folder)
+	// if folder[len(folder)-1] == 0x2f {
+	// 	folder = folder[0 : len(folder)-2]
+	// }
 
 	key, _, _ := reader.ReadLine()
 	auth_key := strings.Split(string(key), "=")[1]
