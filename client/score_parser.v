@@ -28,7 +28,6 @@ fn scores_path() string {
 pub struct Score {
 pub:
 	hash		string
-	instr_amnt	byte // amount of instruments
 	playcount	byte
 	diff	byte
 	percent byte
@@ -61,7 +60,7 @@ pub fn decode_scores() []Score {
 		} // block beginning
 		
 		hash := decoder.read_string()
-		instr_amnt := decoder.read_byte()
+		instr_amnt := decoder.read_byte() // not needed
 		playcount := decoder.read_byte()
 
 		decoder.skip(4)
@@ -75,7 +74,7 @@ pub fn decode_scores() []Score {
 		hiscore := decoder.read_uint()
 
 		score := Score {
-			hash, instr_amnt, playcount, difficulty, percentage, fc, speed, stars, mods, hiscore
+			hash, playcount, difficulty, percentage, fc, speed, stars, mods, hiscore
 		}
 		scores << score
 	}

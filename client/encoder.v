@@ -48,24 +48,8 @@ pub fn (mut c Encoder) finish() []byte {
 	return tmp
 }
 
-fn encode_handshake(pack CHandshake) []byte {
+fn encode_clir_send(pack Packet) []byte {
 	mut e := Encoder{}
-	e.encode_byte(pack.id)
-	println(pack.ts)
-	e.encode_u64(pack.ts)
-	return e.finish()
-}
-
-fn encode_auth_request(pack CAuthRequest) []byte {
-	mut e := Encoder{}
-	e.encode_byte(pack.id)
-	e.encode_string(pack.key)
-	return e.finish()
-}
-
-fn encode_clir_send(pack CClirSend) []byte {
-	mut e := Encoder{}
-	e.encode_byte(pack.id)
 
 	// encode the key again here so we can be sure it's the same player
 	e.encode_string(pack.key)
