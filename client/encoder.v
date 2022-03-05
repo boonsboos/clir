@@ -73,15 +73,13 @@ fn encode_clir_send(pack CClirSend) []byte {
 	score := pack.clir.score_data
 	e.encode_string(score.hash) // chart hash
 	e.encode_byte(score.playcount) // might remove this
-
-	data := pack.clir.score_data.scoredata
-	e.encode_byte(data.diff) // chart difficulty
-	e.encode_byte(data.percent) // accuracy
-	e.encode_bool(data.fc) // is fc?
-	e.encode_u16(data.speed) // speed in percentages
-	e.encode_byte(data.stars) // how many stars
-	e.encode_byte(data.mods) // modifiers, i only know 0x01 == no fail
-	e.encode_u32(data.hiscore) // actual score
+	e.encode_byte(score.diff) // chart difficulty
+	e.encode_byte(score.percent) // accuracy
+	e.encode_bool(score.fc) // is fc?
+	e.encode_u16(score.speed) // speed in percentages
+	e.encode_byte(score.stars) // how many stars
+	e.encode_byte(score.mods) // modifiers, i only know 0x01 == no fail
+	e.encode_u32(score.hiscore) // actual score
 
 	chart := pack.clir.chart_data
 	e.encode_string(chart.artist)

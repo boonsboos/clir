@@ -30,13 +30,6 @@ pub:
 	hash		string
 	instr_amnt	byte // amount of instruments
 	playcount	byte
-	scoredata   ScoreData
-}
-
-[heap]
-pub struct ScoreData {
-pub:
-	id		byte
 	diff	byte
 	percent byte
 	fc		bool
@@ -71,11 +64,7 @@ pub fn decode_scores() []Score {
 		instr_amnt := decoder.read_byte()
 		playcount := decoder.read_byte()
 
-		decoder.skip(2)
-
-		id := decoder.read_byte()
-
-		decoder.skip(1)
+		decoder.skip(4)
 
 		difficulty := decoder.read_byte()
 		percentage := decoder.read_byte()
@@ -85,12 +74,8 @@ pub fn decode_scores() []Score {
 		mods := decoder.read_byte()
 		hiscore := decoder.read_uint()
 
-		data := ScoreData {
-			id, difficulty, percentage, fc, speed, stars, mods, hiscore
-		}
-
 		score := Score {
-			hash, instr_amnt, playcount, data
+			hash, instr_amnt, playcount, difficulty, percentage, fc, speed, stars, mods, hiscore
 		}
 		scores << score
 	}

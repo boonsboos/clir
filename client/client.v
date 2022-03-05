@@ -32,12 +32,13 @@ pub fn run() {
 	map_scores_to_client()
 	clir_client.score_mtime = os.file_last_mod_unix(scores_path)
 
+	song_info_for_hash('a')
+	song_info_for_hash('b')
 	// watch scores.bin
 	// reparse when mtime changes
 	for {
 		if os.file_last_mod_unix(scores_path) != clir_client.score_mtime && !clir_client.busy {
 			clir_client.score_mtime = os.file_last_mod_unix(scores_path)
-			println('memleak')
 			compare_map() 
 		}
 		time.sleep(time.second)
